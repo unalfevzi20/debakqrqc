@@ -983,30 +983,118 @@ if current == "sabah_toplantisi":
 
     # ── AKTİF TOPLANTI YOKSA ─────────────────────────────────────────────
     else:
-        col_new, col_info = st.columns([1, 2])
+        col_new, col_info = st.columns([1.3, 1.7])
         with col_new:
             st.subheader("➕ Yeni Toplantı Başlat")
-            with st.form("new_meeting_form", clear_on_submit=True):
-                vardiya = st.selectbox("Vardiya", VARDIYA_SECENEKLERI)
-                katilimcilar = st.text_area(
-                    "Katılımcılar", placeholder="Ahmet Yılmaz, Elif Demir …", height=100,
-                )
-                submitted_meeting = st.form_submit_button(
-                    "🚀 Toplantıyı Başlat", use_container_width=True, type="primary",
-                )
+            
+            katilimcilar = st.text_area(
+                "Katılımcılar", placeholder="Ahmet Yılmaz, Elif Demir …", height=100,
+            )
+            
+            st.markdown("---")
+            st.markdown("##### 📋 Sabah Kritik Kontrol Listesi")
+            
+            checklist_items = [
+                {
+                    "label": "1. İş Sağlığı & Güvenliği (Kaza/Ramak Kala)",
+                    "category": "İş Sağlığı & Güvenliği",
+                    "key": "isg"
+                },
+                {
+                    "label": "2. Müşteri Kalite Vakası",
+                    "category": "Müşteri Kalite Vakası",
+                    "key": "musteri_kalite"
+                },
+                {
+                    "label": "3. Tedarikçi Kalite Vakası",
+                    "category": "Tedarikçi Kalite Vakası",
+                    "key": "tedarikci_kalite"
+                },
+                {
+                    "label": "4. İşletme İçi Kalite Vakası",
+                    "category": "İşletme İçi Kalite Vakası",
+                    "key": "isletme_kalite"
+                },
+                {
+                    "label": "5. CSL1 Kontrol Durumu",
+                    "category": "CSL1 Kontrol Durumu",
+                    "key": "csl1"
+                },
+                {
+                    "label": "6. Yeni Ürün Proje Takibi",
+                    "category": "Yeni Ürün Proje Takibi",
+                    "key": "yeni_urun"
+                }
+            ]
+            
+            checklist_values = {}
+            for item in checklist_items:
+                checked = st.checkbox(item["label"], value=False, key=f"chk_{item['key']}")
+                desc = ""
+                if checked:
+                    desc = st.text_area(
+                        f"↳ {item['category']} Açıklaması",
+                        placeholder=f"{item['category']} detaylarını giriniz...",
+                        key=f"desc_{item['key']}",
+                        height=80
+                    )
+                checklist_values[item["key"]] = {"checked": checked, "desc": desc}
+                
+            submitted_meeting = st.button(
+                "🚀 Toplantıyı Başlat", use_container_width=True, type="primary"
+            )
+            
             if submitted_meeting:
                 if not katilimcilar.strip():
                     st.warning("Lütfen en az bir katılımcı girin.")
                 else:
-                    now = datetime.now()
-                    with get_db() as db:
-                        db.add(Meeting(
-                            tarih=now, vardiya=vardiya,
-                            katilimcilar=katilimcilar.strip(),
-                            baslangic_zamani=now, bitis_zamani=None,
-                        ))
-                    st.success("Toplantı başlatıldı! ⏱️ Süre sayacı çalışıyor…")
-                    st.rerun()
+                    # Check if any checked items have empty descriptions
+                    missing_fields = []
+                    for item in checklist_items:
+                        item_data = checklist_values.get(item["key"])
+                        if item_data and item_data["checked"] and not item_data["desc"].strip():
+                            missing_fields.append(item["category"])
+                    
+                    if missing_fields:
+                        st.error(f"Lütfen işaretlediğiniz şu maddeler için açıklama giriniz: {', '.join(missing_fields)}")
+                    else:
+                        now = datetime.now()
+                        # Automatically determine shift based on startup hour
+                        hour = now.hour
+                        if 8 <= hour < 16:
+                            vardiya = "Gündüz"
+                        elif 16 <= hour < 24:
+                            vardiya = "Akşam"
+                        else:
+                            vardiya = "Gece"
+
+                        with get_db() as db:
+                            new_meeting = Meeting(
+                                tarih=now,
+                                vardiya=vardiya,
+                                katilimcilar=katilimcilar.strip(),
+                                baslangic_zamani=now,
+                                bitis_zamani=None,
+                            )
+                            db.add(new_meeting)
+                            db.flush()  # to get new_meeting.id
+                            
+                            # Automatically convert checked checklist items to Issues
+                            for item in checklist_items:
+                                item_data = checklist_values.get(item["key"])
+                                if item_data and item_data["checked"]:
+                                    desc_text = item_data["desc"].strip()
+                                    db.add(Issue(
+                                        meeting_id=new_meeting.id,
+                                        problem_tanimi=desc_text,
+                                        tespit_yeri="Sabah Toplantısı",
+                                        kategori=item["category"],
+                                        acil_onlem_alindi_mi=False,
+                                        durum="Açık",
+                                        olusturma_tarihi=now,
+                                    ))
+                        st.success("Toplantı başlatıldı ve kritik kontrol listesi maddeleri probleme dönüştürüldü! ⏱️ Süre sayacı çalışıyor…")
+                        st.rerun()
 
         with col_info:
             st.subheader("📋 Durum")
