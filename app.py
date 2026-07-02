@@ -222,11 +222,12 @@ section[data-testid="stSidebar"] {
 section[data-testid="stSidebar"] hr { border-color: #334155; }
 
 /* ── Nav Kart Butonları (Sidebar) ────────────────────────────────────── */
-section[data-testid="stSidebar"] div.stButton button[kind="secondary"] {
+section[data-testid="stSidebar"] div.stButton button[kind="secondary"],
+section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-secondary"] {
     width: 100% !important;
-    background-color: #1E293B !important;
-    color: #FFFFFF !important;
-    border: 1px solid #334155 !important;
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid #E2E8F0 !important;
     border-radius: 12px !important;
     min-height: 48px !important;
     padding: 10px 16px !important;
@@ -234,25 +235,30 @@ section[data-testid="stSidebar"] div.stButton button[kind="secondary"] {
     display: flex !important;
     justify-content: flex-start !important;
     transition: all 0.2s ease !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
 }
-section[data-testid="stSidebar"] div.stButton button[kind="secondary"] p {
-    color: #FFFFFF !important;
+section[data-testid="stSidebar"] div.stButton button[kind="secondary"] p,
+section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-secondary"] p {
+    color: #0F172A !important;
     font-weight: 600 !important;
     font-size: 0.85rem !important;
     margin: 0 !important;
 }
-section[data-testid="stSidebar"] div.stButton button[kind="secondary"]:hover {
+section[data-testid="stSidebar"] div.stButton button[kind="secondary"]:hover,
+section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-secondary"]:hover {
+    background-color: #3B82F6 !important;
     border-color: #3B82F6 !important;
     color: #FFFFFF !important;
     transform: translateY(-1px);
 }
-section[data-testid="stSidebar"] div.stButton button[kind="secondary"]:hover p {
+section[data-testid="stSidebar"] div.stButton button[kind="secondary"]:hover p,
+section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-secondary"]:hover p {
     color: #FFFFFF !important;
 }
 
 /* Aktif nav kart (Primary) */
-section[data-testid="stSidebar"] div.stButton button[kind="primary"] {
+section[data-testid="stSidebar"] div.stButton button[kind="primary"],
+section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-primary"] {
     width: 100% !important;
     background-color: #3B82F6 !important;
     color: #FFFFFF !important;
@@ -265,11 +271,22 @@ section[data-testid="stSidebar"] div.stButton button[kind="primary"] {
     justify-content: flex-start !important;
     box-shadow: 0 4px 20px rgba(59,130,246,0.35) !important;
 }
-section[data-testid="stSidebar"] div.stButton button[kind="primary"] p {
+section[data-testid="stSidebar"] div.stButton button[kind="primary"] p,
+section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-primary"] p {
     color: #FFFFFF !important;
     font-weight: 600 !important;
     font-size: 0.85rem !important;
     margin: 0 !important;
+}
+section[data-testid="stSidebar"] div.stButton button[kind="primary"]:hover,
+section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-primary"]:hover {
+    background-color: #2563EB !important;
+    border-color: #2563EB !important;
+    color: #FFFFFF !important;
+}
+section[data-testid="stSidebar"] div.stButton button[kind="primary"]:hover p,
+section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-primary"]:hover p {
+    color: #FFFFFF !important;
 }
 
 /* Geciken (kırmızı) nav kart */
@@ -470,6 +487,22 @@ def badge_html(text: str) -> str:
     return f'<span class="badge {css_map.get(text, "badge-open")}">{text}</span>'
 
 
+def sanitize_status(status: str | None) -> str:
+    if not status:
+        return "Açık"
+    m = {
+        'Acik': 'Açık',
+        'acik': 'Açık',
+        'Devam ediyor': 'Devam Ediyor',
+        'devam ediyor': 'Devam Ediyor',
+        'dogrulama': 'Doğrulama',
+        'Dogrulama': 'Doğrulama',
+        'kapandi': 'Kapandı',
+        'Kapandi': 'Kapandı'
+    }
+    return m.get(status.strip(), status.strip())
+
+
 def load_active_meeting() -> dict | None:
     with get_db() as db:
         m = (
@@ -529,7 +562,7 @@ def load_all_actions() -> list[dict]:
             {"id": a.id, "issue_id": a.issue_id,
              "problem": f"[{a.issue.kategori}] {a.issue.tespit_yeri}" if a.issue else "—",
              "aksiyon_tanimi": a.aksiyon_tanimi, "sorumlu": a.sorumlu,
-             "termin_tarihi": a.termin_tarihi, "aksiyon_durumu": a.aksiyon_durumu}
+             "termin_tarihi": a.termin_tarihi, "aksiyon_durumu": sanitize_status(a.aksiyon_durumu)}
             for a in actions
         ]
 
@@ -546,10 +579,10 @@ def load_global_kpis() -> dict:
             "toplanti_bu_hafta": db.query(Meeting).filter(Meeting.tarih >= start_of_week).count(),
             "acik_problem": db.query(Issue).filter(Issue.durum == "Açık").count(),
             "acik_aksiyon": db.query(Action).filter(
-                Action.aksiyon_durumu.in_(["Açık", "Devam Ediyor"])
+                Action.aksiyon_durumu.in_(["Açık", "Devam Ediyor", "Acik", "Devam ediyor", "acik", "devam ediyor"])
             ).count(),
             "geciken": db.query(Action).filter(
-                Action.aksiyon_durumu.in_(["Açık", "Devam Ediyor"]),
+                Action.aksiyon_durumu.in_(["Açık", "Devam Ediyor", "Acik", "Devam ediyor", "acik", "devam ediyor"]),
                 Action.termin_tarihi < date.today(),
             ).count(),
         }
@@ -659,11 +692,12 @@ def render_action_update_form(all_actions: list[dict]) -> None:
         )
     if update_btn:
         action_id = update_options[selected_action_label]
+        sanitized = sanitize_status(new_status)
         with get_db() as db:
             action_obj = db.query(Action).get(action_id)
             if action_obj:
-                action_obj.aksiyon_durumu = new_status
-        st.success(f"Aksiyon #{action_id} durumu → **{new_status}** olarak güncellendi.")
+                action_obj.aksiyon_durumu = sanitized
+        st.success(f"Aksiyon #{action_id} durumu → **{sanitized}** olarak güncellendi.")
         st.rerun()
 
 
@@ -995,7 +1029,7 @@ if current == "sabah_toplantisi":
                             issue_id=issue_action_options[selected_issue_label],
                             aksiyon_tanimi=aksiyon_tanimi.strip(),
                             sorumlu=sorumlu.strip(),
-                            termin_tarihi=termin, aksiyon_durumu="Açık",
+                            termin_tarihi=termin, aksiyon_durumu=sanitize_status("Açık"),
                         ))
                     st.success("Aksiyon başarıyla kaydedildi!")
                     st.rerun()
@@ -1203,7 +1237,7 @@ if current == "sabah_toplantisi":
                                 st.write("**Aksiyonlar:**")
                                 for a in issue.actions:
                                     termin_str = a.termin_tarihi.strftime("%d.%m.%Y") if a.termin_tarihi else "—"
-                                    st.markdown(f"- {badge_html(a.aksiyon_durumu)} **{a.sorumlu}** ({termin_str}): {a.aksiyon_tanimi}", unsafe_allow_html=True)
+                                    st.markdown(f"- {badge_html(sanitize_status(a.aksiyon_durumu))} **{a.sorumlu}** ({termin_str}): {a.aksiyon_tanimi}", unsafe_allow_html=True)
                             else:
                                 st.caption("Bu probleme bağlı aksiyon yok.")
 
@@ -1488,8 +1522,12 @@ elif current == "gorsel_analiz":
 
     # DataFrames
     df_actions = pd.DataFrame(actions_data)
+    if not df_actions.empty:
+        df_actions['aksiyon_durumu'] = df_actions['aksiyon_durumu'].replace({'Acik': 'Açık', 'acik': 'Açık'})
     df_issues = pd.DataFrame(issues_data)
     df_active = pd.DataFrame(active_data)
+    if not df_active.empty:
+        df_active['aksiyon_durumu'] = df_active['aksiyon_durumu'].replace({'Acik': 'Açık', 'acik': 'Açık'})
 
     col_g1, col_g2 = st.columns(2)
 
