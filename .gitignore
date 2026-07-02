@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.db
+qrqc.db
+.ipynb_checkpoints/
+.streamlit/
+.env
+.venv/
+env/
+venv/
