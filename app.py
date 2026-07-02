@@ -15,6 +15,7 @@ from datetime import date, datetime, timedelta
 
 import pandas as pd
 import streamlit as st
+import plotly.express as px
 
 # ── Models importu ─────────────────────────────────────────────────────────
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -61,6 +62,7 @@ PAGES = {
     "kok_neden":        "🔍  Kök Neden Analizi",
     "geciken":          "⚠️  Geciken Aksiyonlar",
     "acik_problemler":  "🔴  Açık Problemler",
+    "gorsel_analiz":    "📊  Görsel Analiz",
 }
 
 if "current_page" not in st.session_state:
@@ -217,14 +219,13 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
 }
-section[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 section[data-testid="stSidebar"] hr { border-color: #334155; }
 
 /* ── Nav Kart Butonları (Sidebar) ────────────────────────────────────── */
 section[data-testid="stSidebar"] div.stButton button[kind="secondary"] {
     width: 100% !important;
-    background-color: #0F172A !important;
-    color: #94A3B8 !important;
+    background-color: #1E293B !important;
+    color: #FFFFFF !important;
     border: 1px solid #334155 !important;
     border-radius: 12px !important;
     min-height: 48px !important;
@@ -235,10 +236,19 @@ section[data-testid="stSidebar"] div.stButton button[kind="secondary"] {
     transition: all 0.2s ease !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
 }
+section[data-testid="stSidebar"] div.stButton button[kind="secondary"] p {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    margin: 0 !important;
+}
 section[data-testid="stSidebar"] div.stButton button[kind="secondary"]:hover {
     border-color: #3B82F6 !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
     transform: translateY(-1px);
+}
+section[data-testid="stSidebar"] div.stButton button[kind="secondary"]:hover p {
+    color: #FFFFFF !important;
 }
 
 /* Aktif nav kart (Primary) */
@@ -255,8 +265,8 @@ section[data-testid="stSidebar"] div.stButton button[kind="primary"] {
     justify-content: flex-start !important;
     box-shadow: 0 4px 20px rgba(59,130,246,0.35) !important;
 }
-
-section[data-testid="stSidebar"] div.stButton button p {
+section[data-testid="stSidebar"] div.stButton button[kind="primary"] p {
+    color: #FFFFFF !important;
     font-weight: 600 !important;
     font-size: 0.85rem !important;
     margin: 0 !important;
@@ -792,6 +802,15 @@ with st.sidebar:
         type="primary" if current == "kok_neden" else "secondary",
     )
 
+    st.button(
+        "📊  Görsel Analiz",
+        key="nav_gorsel_analiz",
+        on_click=navigate,
+        args=("gorsel_analiz",),
+        use_container_width=True,
+        type="primary" if current == "gorsel_analiz" else "secondary",
+    )
+
     st.divider()
     st.caption(f"📅 {datetime.now().strftime('%d.%m.%Y %H:%M')}")
     st.caption("v3.0 — QRQC Yönetim Sistemi")
@@ -992,7 +1011,7 @@ if current == "sabah_toplantisi":
             )
             
             st.markdown("---")
-            st.markdown("##### 📋 Sabah Kritik Kontrol Listesi")
+            st.markdown("##### 📋 Kritik Kontrol Listesi")
             
             checklist_items = [
                 {
@@ -1443,4 +1462,109 @@ elif current == "kok_neden":
             status_msg = " ve problem **kapatıldı**" if close_issue else ""
             st.success(f"Kök neden analizi kaydedildi{status_msg}!")
             st.rerun()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  SAYFA: Görsel Analiz (Dashboard)
+# ═══════════════════════════════════════════════════════════════════════════
+elif current == "gorsel_analiz":
+    st.subheader("📊 Görsel Analiz Paneli")
+    st.caption("Veritabanı kayıtlarının dağılım grafikleri ve KPI görselleştirmesi.")
+
+    # 1) Donut Chart: Actions by status
+    # 2) Pareto/Bar Chart: Issues by category
+    # 3) Horizontal Bar Chart: Active actions workload per responsible person
+    
+    with get_db() as db:
+        # Secure database calls using SQLAlchemy
+        all_actions = db.query(Action).all()
+        all_issues = db.query(Issue).all()
+        active_actions = db.query(Action).filter(Action.aksiyon_durumu.in_(["Açık", "Devam Ediyor"])).all()
+
+        # Extract data while session is active to prevent DetachedInstanceError
+        actions_data = [{"aksiyon_durumu": a.aksiyon_durumu} for a in all_actions]
+        issues_data = [{"kategori": i.kategori} for i in all_issues]
+        active_data = [{"sorumlu": a.sorumlu, "aksiyon_durumu": a.aksiyon_durumu} for a in active_actions]
+
+    # DataFrames
+    df_actions = pd.DataFrame(actions_data)
+    df_issues = pd.DataFrame(issues_data)
+    df_active = pd.DataFrame(active_data)
+
+    col_g1, col_g2 = st.columns(2)
+
+    with col_g1:
+        st.markdown("### 🍩 Aksiyon Durumu Dağılımı")
+        if df_actions.empty:
+            st.info("Grafik için yeterli aksiyon verisi bulunmuyor.")
+        else:
+            df_status = df_actions['aksiyon_durumu'].value_counts().reset_index()
+            df_status.columns = ['Aksiyon Durumu', 'Sayı']
+            fig1 = px.pie(
+                df_status, 
+                names='Aksiyon Durumu', 
+                values='Sayı', 
+                hole=0.4, 
+                color_discrete_sequence=px.colors.qualitative.Pastel
+            )
+            fig1.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                template="plotly_dark",
+                margin=dict(l=20, r=20, t=20, b=20),
+                height=350
+            )
+            st.plotly_chart(fig1, use_container_width=True)
+
+    with col_g2:
+        st.markdown("### 📊 Kategorilere Göre Problemler")
+        if df_issues.empty:
+            st.info("Grafik için yeterli problem verisi bulunmuyor.")
+        else:
+            df_kat = df_issues['kategori'].value_counts().reset_index()
+            df_kat.columns = ['Kategori', 'Problem Sayısı']
+            df_kat = df_kat.sort_values(by='Problem Sayısı', ascending=False)
+            fig2 = px.bar(
+                df_kat, 
+                x='Kategori', 
+                y='Problem Sayısı', 
+                text='Problem Sayısı',
+                color='Kategori',
+                color_discrete_sequence=px.colors.qualitative.Safe
+            )
+            fig2.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                template="plotly_dark",
+                margin=dict(l=20, r=20, t=20, b=20),
+                height=350,
+                showlegend=False
+            )
+            st.plotly_chart(fig2, use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("### 🏃 Sorumlulara Göre Aktif Aksiyon Yükü")
+    if df_active.empty:
+        st.info("Aktif aksiyon (Açık veya Devam Ediyor) bulunmuyor.")
+    else:
+        df_workload = df_active.groupby(['sorumlu', 'aksiyon_durumu']).size().reset_index(name='Aksiyon Sayısı')
+        df_workload.columns = ['Sorumlu', 'Aksiyon Durumu', 'Aksiyon Sayısı']
+        
+        fig3 = px.bar(
+            df_workload,
+            y='Sorumlu',
+            x='Aksiyon Sayısı',
+            color='Aksiyon Durumu',
+            orientation='h',
+            color_discrete_map={"Açık": "#EF4444", "Devam Ediyor": "#3B82F6"}
+        )
+        fig3.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            template="plotly_dark",
+            margin=dict(l=20, r=20, t=20, b=20),
+            height=400,
+            yaxis={'categoryorder':'total ascending'}
+        )
+        st.plotly_chart(fig3, use_container_width=True)
 
