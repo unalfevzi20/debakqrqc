@@ -94,8 +94,8 @@ class Issue(Base):
     tespit_yeri = Column(String(100), nullable=False)     # Hat / Makine / İstasyon adı
     kategori = Column(String(20), nullable=False)         # SQCD
     acil_onlem_alindi_mi = Column(Boolean, default=False)
-    kok_neden_5_why = Column(Text, nullable=True)         # 5 Neden analizi notları
-    df_no = Column(String(50), nullable=True)             # 4D / Düzeltici Faaliyet ref. no
+    kok_neden_5_why = Column(Text, nullable=True)
+    df_no = Column(String(50), nullable=True)
     durum = Column(String(10), nullable=False, default="Açık")
     olusturma_tarihi = Column(DateTime, nullable=False, default=datetime.now)
 

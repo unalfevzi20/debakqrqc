@@ -57,12 +57,10 @@ def get_db():
 #  Session State — Sayfa Takibi
 # ═══════════════════════════════════════════════════════════════════════════
 PAGES = {
-    "sabah_toplantisi": "📅  Sabah Toplantısı",
-    "aksiyon_takip":    "📊  Aksiyon Takip Panosu",
-    "kok_neden":        "🔍  Kök Neden Analizi",
-    "geciken":          "⚠️  Geciken Aksiyonlar",
-    "acik_problemler":  "🔴  Açık Problemler",
-    "gorsel_analiz":    "📊  Görsel Analiz",
+    "sabah_toplantisi": "📅 Toplantı Kayıtları",
+    "acik_problemler":  "🔴 Açık Problemler",
+    "aksiyon_takip":    "📋 Takip Listesi",
+    "gorsel_analiz":    "📈 Görsel Analiz",
 }
 
 if "current_page" not in st.session_state:
@@ -73,6 +71,8 @@ if "is_logged_in" not in st.session_state:
     st.session_state.is_logged_in = False
 if "user_info" not in st.session_state:
     st.session_state.user_info = None
+if "add_action_for_issue_id" not in st.session_state:
+    st.session_state.add_action_for_issue_id = None
 
 if not st.session_state.is_logged_in:
     st.markdown(
@@ -222,82 +222,99 @@ section[data-testid="stSidebar"] {
 section[data-testid="stSidebar"] hr { border-color: #334155; }
 
 /* ── Nav Kart Butonları (Sidebar) ────────────────────────────────────── */
-section[data-testid="stSidebar"] div.stButton button[kind="secondary"],
-section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-secondary"] {
-    width: 100% !important;
+/* Custom Global Buttons Style (Yüksek Kontrast) */
+div.stButton button[kind="secondary"],
+div.stButton button[data-testid="baseButton-secondary"] {
     background-color: #FFFFFF !important;
     color: #0F172A !important;
-    border: 1px solid #E2E8F0 !important;
-    border-radius: 12px !important;
-    min-height: 48px !important;
-    padding: 10px 16px !important;
-    text-align: left !important;
-    display: flex !important;
-    justify-content: flex-start !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 10px !important;
+    min-height: 44px !important;
+    padding: 8px 16px !important;
     transition: all 0.2s ease !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
 }
-section[data-testid="stSidebar"] div.stButton button[kind="secondary"] p,
-section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-secondary"] p {
+div.stButton button[kind="secondary"] p,
+div.stButton button[data-testid="baseButton-secondary"] p {
     color: #0F172A !important;
-    font-weight: 600 !important;
-    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
     margin: 0 !important;
 }
-section[data-testid="stSidebar"] div.stButton button[kind="secondary"]:hover,
-section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-secondary"]:hover {
-    background-color: #3B82F6 !important;
-    border-color: #3B82F6 !important;
-    color: #FFFFFF !important;
-    transform: translateY(-1px);
+div.stButton button[kind="secondary"]:hover,
+div.stButton button[data-testid="baseButton-secondary"]:hover {
+    background-color: #F1F5F9 !important;
+    border-color: #94A3B8 !important;
+    color: #000000 !important;
 }
-section[data-testid="stSidebar"] div.stButton button[kind="secondary"]:hover p,
-section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-secondary"]:hover p {
-    color: #FFFFFF !important;
+div.stButton button[kind="secondary"]:hover p,
+div.stButton button[data-testid="baseButton-secondary"]:hover p {
+    color: #000000 !important;
 }
 
-/* Aktif nav kart (Primary) */
-section[data-testid="stSidebar"] div.stButton button[kind="primary"],
-section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-primary"] {
-    width: 100% !important;
+/* Active / Primary Buttons */
+div.stButton button[kind="primary"],
+div.stButton button[data-testid="baseButton-primary"] {
     background-color: #3B82F6 !important;
     color: #FFFFFF !important;
     border: 1px solid #3B82F6 !important;
-    border-radius: 12px !important;
-    min-height: 48px !important;
-    padding: 10px 16px !important;
-    text-align: left !important;
-    display: flex !important;
-    justify-content: flex-start !important;
-    box-shadow: 0 4px 20px rgba(59,130,246,0.35) !important;
+    border-radius: 10px !important;
+    min-height: 44px !important;
+    padding: 8px 16px !important;
+    box-shadow: 0 4px 12px rgba(59,130,246,0.3) !important;
 }
-section[data-testid="stSidebar"] div.stButton button[kind="primary"] p,
-section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-primary"] p {
+div.stButton button[kind="primary"] p,
+div.stButton button[data-testid="baseButton-primary"] p {
     color: #FFFFFF !important;
-    font-weight: 600 !important;
-    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
     margin: 0 !important;
 }
-section[data-testid="stSidebar"] div.stButton button[kind="primary"]:hover,
-section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-primary"]:hover {
+div.stButton button[kind="primary"]:hover,
+div.stButton button[data-testid="baseButton-primary"]:hover {
     background-color: #2563EB !important;
     border-color: #2563EB !important;
     color: #FFFFFF !important;
 }
-section[data-testid="stSidebar"] div.stButton button[kind="primary"]:hover p,
-section[data-testid="stSidebar"] div.stButton button[data-testid="baseButton-primary"]:hover p {
+div.stButton button[kind="primary"]:hover p,
+div.stButton button[data-testid="baseButton-primary"]:hover p {
     color: #FFFFFF !important;
 }
 
-/* Geciken (kırmızı) nav kart */
-div.element-container:has(.marker-danger) + div.element-container button {
-    border-color: #EF4444 !important;
+/* Clean QRQC Table Styling */
+.qrqc-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 15px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #E2E8F0;
 }
-div.element-container:has(.marker-danger) + div.element-container button:hover {
-    border-color: #F87171 !important;
+.qrqc-table th {
+    background-color: #0F172A;
+    color: #F8FAFC;
+    padding: 12px 16px;
+    font-weight: 700;
+    text-align: left;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.qrqc-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #E2E8F0;
+    color: #334155;
+    font-size: 0.9rem;
+    background-color: #FFFFFF;
+}
+.qrqc-table tr:last-child td {
+    border-bottom: none;
+}
+.qrqc-table tr:hover td {
+    background-color: #F8FAFC;
 }
 
-/* ── Gelişmiş KPI Kartları ───────────────────────────────────────────── */
 .kpi-container {
     display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap;
 }
@@ -541,12 +558,12 @@ def load_last_completed_meetings(limit: int = 5) -> list[dict]:
         ]
 
 
-def load_open_issues() -> list[dict]:
+def load_open_issues(meeting_id: int | None = None) -> list[dict]:
     with get_db() as db:
-        issues = (
-            db.query(Issue).filter(Issue.durum == "Açık")
-            .order_by(Issue.olusturma_tarihi.desc()).all()
-        )
+        query = db.query(Issue).filter(Issue.durum.in_(["Açık", "Acik"]))
+        if meeting_id is not None:
+            query = query.filter(Issue.meeting_id == meeting_id)
+        issues = query.order_by(Issue.olusturma_tarihi.desc()).all()
         return [
             {"id": i.id, "kategori": i.kategori, "tespit_yeri": i.tespit_yeri,
              "problem_tanimi": i.problem_tanimi,
@@ -625,8 +642,8 @@ def load_all_users() -> list[dict]:
 
 
 def render_action_table(actions: list[dict], today: date, page_prefix: str = "") -> None:
-    """Aksiyon listesini renkli satırlarla render eder. Sil butonu dahil."""
-    header_cols = st.columns([0.5, 2.2, 1.8, 1.3, 1.1, 1.1, 1.1, 0.5])
+    """Aksiyon listesini renkli satırlarla render eder. Kapat ve Sil butonları dahil."""
+    header_cols = st.columns([0.5, 2.0, 1.8, 1.3, 1.1, 1.1, 1.1, 1.1])
     header_cols[0].markdown("**#**")
     header_cols[1].markdown("**Problem**")
     header_cols[2].markdown("**Aksiyon**")
@@ -650,55 +667,102 @@ def render_action_table(actions: list[dict], today: date, page_prefix: str = "")
         else:
             gecikme_text = "—"
 
-        st.markdown(f'<div class="{row_class}">', unsafe_allow_html=True)
-        rc = st.columns([0.5, 2.2, 1.8, 1.3, 1.1, 1.1, 1.1, 0.5])
+        rc = st.columns([0.5, 2.0, 1.8, 1.3, 1.1, 1.1, 1.1, 1.1])
         rc[0].write(f"**{a['id']}**")
         rc[1].write(a["problem"])
-        rc[2].write(a["aksiyon_tanimi"][:50] + ("…" if len(a["aksiyon_tanimi"]) > 50 else ""))
+        parts = a["aksiyon_tanimi"].split("\n\n")
+        main_desc = parts[0]
+        developments = parts[1:]
+        with rc[2]:
+            st.write(main_desc)
+            for dev in developments:
+                st.markdown(f"<div style='padding-left: 10px; font-size: 0.85em; color: #555; line-height: 1.2;'>↳ {dev}</div>", unsafe_allow_html=True)
         rc[3].write(a["sorumlu"])
         rc[4].write(a["termin_tarihi"].strftime("%d.%m.%Y"))
         rc[5].markdown(badge_html(a["aksiyon_durumu"]), unsafe_allow_html=True)
         rc[6].write(gecikme_text)
         with rc[7]:
-            if st.button("🗑️", key=f"{page_prefix}del_{a['id']}", help=f"Aksiyon #{a['id']} sil"):
-                if delete_action_by_id(a["id"]):
-                    st.toast(f"Aksiyon #{a['id']} silindi.", icon="✅")
-                    st.rerun()
-                else:
-                    st.toast(f"Aksiyon #{a['id']} bulunamadı!", icon="❌")
-        st.markdown("</div>", unsafe_allow_html=True)
-
+            bcol1, bcol2 = st.columns(2)
+            with bcol1:
+                if not is_closed:
+                    if st.button("✅", key=f"{page_prefix}cls_{a['id']}", help="Kapat"):
+                        with get_db() as db:
+                            action_obj = db.query(Action).get(a["id"])
+                            if action_obj:
+                                action_obj.aksiyon_durumu = "Kapandı"
+                        st.toast(f"Aksiyon #{a['id']} kapatıldı.", icon="✅")
+                        st.rerun()
+            with bcol2:
+                if st.button("🗑️", key=f"{page_prefix}del_{a['id']}", help="Sil"):
+                    if delete_action_by_id(a["id"]):
+                        st.toast(f"Aksiyon #{a['id']} silindi.", icon="✅")
+                        st.rerun()
+                    else:
+                        st.toast(f"Aksiyon #{a['id']} bulunamadı!", icon="❌")
 
 def render_action_update_form(all_actions: list[dict]) -> None:
-    """Aksiyon durumu güncelleme formu."""
+    """Aksiyon durumu güncelleme formu (dinamik statü filtrelemeli ve in-place güncellemeli)."""
     st.subheader("🔄 Aksiyon Durumu Güncelle")
     active_actions = [a for a in all_actions if a["aksiyon_durumu"] != "Kapandı"]
     if not active_actions:
         st.success("Tüm aksiyonlar kapatılmış. Harika! 🎉")
         return
 
-    update_options = {
-        f"#{a['id']} — {a['sorumlu']}: {a['aksiyon_tanimi'][:50]}": a["id"]
-        for a in active_actions
-    }
-    with st.form("update_action_form"):
-        cu1, cu2 = st.columns([3, 1])
-        with cu1:
-            selected_action_label = st.selectbox("Aksiyonu Seçin", list(update_options.keys()))
-        with cu2:
-            new_status = st.selectbox("Yeni Durum", AKSIYON_DURUM)
-        update_btn = st.form_submit_button(
-            "✅ Durumu Güncelle", use_container_width=True, type="primary",
-        )
+    update_options = {}
+    for a in active_actions:
+        main_desc = a["aksiyon_tanimi"].split("\n\n")[0]
+        label = f"#{a['id']} — {a['sorumlu']}: {main_desc[:50]}"
+        update_options[label] = a
+
+    selected_action_label = st.selectbox("Aksiyonu Seçin", list(update_options.keys()), key="update_action_select")
+    selected_action = update_options[selected_action_label]
+    current_status = selected_action["aksiyon_durumu"]
+
+    # Determine the next status deterministically
+    sanitized_curr = sanitize_status(current_status)
+    if sanitized_curr == "Açık":
+        next_status = "Devam Ediyor"
+    elif sanitized_curr == "Devam Ediyor":
+        next_status = "Doğrulama"
+    else:
+        next_status = "Kapandı"
+
+    cu1, cu2 = st.columns([3, 1])
+    with cu1:
+        st.info(f"Mevcut Durum: **{current_status}**")
+    with cu2:
+        new_status = st.text_input("Yeni Durum", value=next_status, disabled=True, key="update_action_new_status")
+
+    guncelleme_aciklamasi = st.text_area(
+        "Gelişme Açıklaması", 
+        placeholder="Bu statü değişikliğine sebep olan gelişmeyi açıklayın (örn: parça temin edildi, test tamamlandı vb.)...",
+        height=80,
+        key="update_action_progress_text"
+    )
+
+    update_btn = st.button(
+        "✅ Durumu Güncelle", use_container_width=True, type="primary", key="update_action_btn"
+    )
+
     if update_btn:
-        action_id = update_options[selected_action_label]
-        sanitized = sanitize_status(new_status)
-        with get_db() as db:
-            action_obj = db.query(Action).get(action_id)
-            if action_obj:
-                action_obj.aksiyon_durumu = sanitized
-        st.success(f"Aksiyon #{action_id} durumu → **{sanitized}** olarak güncellendi.")
-        st.rerun()
+        if not guncelleme_aciklamasi.strip():
+            st.warning("Gelişme açıklaması girilmesi zorunludur.")
+        else:
+            action_id = selected_action["id"]
+            sanitized = sanitize_status(new_status)
+            with get_db() as db:
+                action_obj = db.query(Action).get(action_id)
+                if action_obj:
+                    now_str = datetime.now().strftime("%d.%m.%Y %H:%M")
+                    # Construct the accumulated progress description
+                    new_tanim = f"{action_obj.aksiyon_tanimi}\n\n📝 [{now_str} - {sanitized}]: {guncelleme_aciklamasi.strip()}"
+                    
+                    # Update in place
+                    action_obj.aksiyon_durumu = sanitized
+                    action_obj.aksiyon_tanimi = new_tanim
+                    
+            st.success(f"Aksiyon #{action_id} durumu başarıyla **{sanitized}** olarak güncellendi.")
+            st.rerun()
 
 
 def render_action_dataframe(all_actions: list[dict], today: date) -> None:
@@ -780,11 +844,9 @@ with st.sidebar:
         )
     st.divider()
 
-    # ── KPI Navigasyon Kartları ──────────────────────────────────────────
-
-    # 1) Toplam Toplantı
+    # 1) Toplantı Kayıtları
     st.button(
-        f"📅  {kpi['toplam_toplanti']}  ·  Toplam Toplantı",
+        "📅 Toplantı Kayıtları",
         key="nav_toplanti",
         on_click=navigate,
         args=("sabah_toplantisi",),
@@ -794,7 +856,7 @@ with st.sidebar:
 
     # 2) Açık Problemler
     st.button(
-        f"🔴  {kpi['acik_problem']}  ·  Açık Problemler",
+        "🔴 Açık Problemler",
         key="nav_problem",
         on_click=navigate,
         args=("acik_problemler",),
@@ -802,9 +864,9 @@ with st.sidebar:
         type="primary" if current == "acik_problemler" else "secondary",
     )
 
-    # 3) Açık Aksiyonlar
+    # 3) Takip Listesi
     st.button(
-        f"📊  {kpi['acik_aksiyon']}  ·  Açık Aksiyonlar",
+        "📋 Takip Listesi",
         key="nav_aksiyon",
         on_click=navigate,
         args=("aksiyon_takip",),
@@ -812,32 +874,9 @@ with st.sidebar:
         type="primary" if current == "aksiyon_takip" else "secondary",
     )
 
-    # 4) Geciken Aksiyonlar
-    if kpi["geciken"] > 0:
-        st.markdown('<div class="marker-danger" style="display:none;"></div>', unsafe_allow_html=True)
+    # 4) Görsel Analiz
     st.button(
-        f"⚠️  {kpi['geciken']}  ·  Geciken Aksiyonlar",
-        key="nav_geciken",
-        on_click=navigate,
-        args=("geciken",),
-        use_container_width=True,
-        type="primary" if current == "geciken" else "secondary",
-    )
-
-    st.divider()
-
-    # ── Alt Navigasyon Linkleri ──────────────────────────────────────────
-    st.button(
-        "🔍  Kök Neden Analizi (5 Why)",
-        key="nav_kok_neden",
-        on_click=navigate,
-        args=("kok_neden",),
-        use_container_width=True,
-        type="primary" if current == "kok_neden" else "secondary",
-    )
-
-    st.button(
-        "📊  Görsel Analiz",
+        "📈 Görsel Analiz",
         key="nav_gorsel_analiz",
         on_click=navigate,
         args=("gorsel_analiz",),
@@ -845,10 +884,6 @@ with st.sidebar:
         type="primary" if current == "gorsel_analiz" else "secondary",
     )
 
-    st.divider()
-    st.caption(f"📅 {datetime.now().strftime('%d.%m.%Y %H:%M')}")
-    st.caption("v3.0 — QRQC Yönetim Sistemi")
-    
     st.divider()
     if st.button("🚪 Çıkış Yap", key="sidebar_logout_btn", use_container_width=True, type="secondary"):
         st.session_state.is_logged_in = False
@@ -968,7 +1003,6 @@ if current == "sabah_toplantisi":
                     placeholder="Üretim hattında tespit edilen problemi detaylı açıklayın…",
                     height=120,
                 )
-                acil_onlem = st.checkbox("Acil önlem alındı mı?", value=False)
             submitted_issue = st.form_submit_button(
                 "💾 Problemi Kaydet", use_container_width=True, type="primary",
             )
@@ -983,15 +1017,15 @@ if current == "sabah_toplantisi":
                         problem_tanimi=problem_tanimi.strip(),
                         tespit_yeri=tespit_yeri.strip(),
                         kategori=kategori,
-                        acil_onlem_alindi_mi=acil_onlem,
+                        acil_onlem_alindi_mi=False,
                         durum="Açık", olusturma_tarihi=datetime.now(),
                     ))
                 st.success("Problem başarıyla kaydedildi!")
                 st.rerun()
 
         st.divider()
-        st.subheader("⚡ Hızlı Geçici Aksiyon Ekle")
-        open_issues_data = load_open_issues()
+        st.subheader("⚡ Aksiyon Tanımla")
+        open_issues_data = load_open_issues(active_meeting["id"])
         if not open_issues_data:
             st.info("Aksiyon atamak için önce bir problem kaydedin.")
         else:
@@ -1001,7 +1035,7 @@ if current == "sabah_toplantisi":
             }
             with st.form("quick_action_form", clear_on_submit=True):
                 selected_issue_label = st.selectbox("Problemi Seçin", list(issue_action_options.keys()))
-                cx, cy, cz = st.columns(3)
+                cx, cy, cz, cw = st.columns([1.5, 1.0, 1.0, 1.0])
                 with cx:
                     aksiyon_tanimi = st.text_area("Aksiyon Tanımı", placeholder="…", height=80)
                 with cy:
@@ -1017,6 +1051,8 @@ if current == "sabah_toplantisi":
                         sorumlu = st.text_input("Sorumlu Kişi", placeholder="Ad Soyad")
                 with cz:
                     termin = st.date_input("Termin Tarihi", value=date.today() + timedelta(days=3), min_value=date.today())
+                with cw:
+                    aksiyon_durumu = st.text_input("Aksiyon Durumu", value="Açık", disabled=True)
                 submitted_action = st.form_submit_button(
                     "⚡ Aksiyonu Kaydet", use_container_width=True, type="primary",
                 )
@@ -1029,7 +1065,8 @@ if current == "sabah_toplantisi":
                             issue_id=issue_action_options[selected_issue_label],
                             aksiyon_tanimi=aksiyon_tanimi.strip(),
                             sorumlu=sorumlu.strip(),
-                            termin_tarihi=termin, aksiyon_durumu=sanitize_status("Açık"),
+                            termin_tarihi=termin,
+                            aksiyon_durumu=sanitize_status(aksiyon_durumu),
                         ))
                     st.success("Aksiyon başarıyla kaydedildi!")
                     st.rerun()
@@ -1180,10 +1217,10 @@ if current == "sabah_toplantisi":
             tarih_str = c["tarih"].strftime("%d.%m.%Y %H:%M") if c["tarih"] else "—"
             sure_str = f"{c['sure_dakika']} dk" if c["sure_dakika"] is not None else "—"
             
-            row_bg = "background-color: #1e3a5f; border-left: 4px solid #60a5fa;" if st.session_state.get("selected_meeting_id") == c["id"] else ""
-            st.markdown(f'<div class="normal-row" style="{row_bg}">', unsafe_allow_html=True)
+            is_selected = st.session_state.get("selected_meeting_id") == c["id"]
+            prefix = "👉 " if is_selected else ""
             rc = st.columns([1, 2, 2, 1, 1, 2])
-            rc[0].write(f"**#{c['id']}**")
+            rc[0].write(f"**{prefix}#{c['id']}**")
             rc[1].write(tarih_str)
             rc[2].write(c["vardiya"])
             rc[3].write(sure_str)
@@ -1200,10 +1237,10 @@ if current == "sabah_toplantisi":
                             st.toast(f"Toplantı #{c['id']} silindi.", icon="✅")
                             if st.session_state.get("selected_meeting_id") == c["id"]:
                                 st.session_state.selected_meeting_id = None
-                            st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── DİNAMİK DETAY PANELİ ─────────────────────────────────────────────
+
+
+    # ── DİNAMİK DETAY PANELİ ──────────────────────────────────────────
     if st.session_state.get("selected_meeting_id"):
         sm_id = st.session_state.selected_meeting_id
         st.markdown("---")
@@ -1230,8 +1267,6 @@ if current == "sabah_toplantisi":
                     for issue in m.issues:
                         with st.expander(f"🔴 Problem: [{issue.kategori}] {issue.tespit_yeri} - {issue.durum}", expanded=True):
                             st.write(f"**Tanım:** {issue.problem_tanimi}")
-                            if issue.kok_neden_5_why:
-                                st.write(f"**5 Neden Analizi:** {issue.kok_neden_5_why}")
                             
                             if issue.actions:
                                 st.write("**Aksiyonlar:**")
@@ -1241,10 +1276,99 @@ if current == "sabah_toplantisi":
                             else:
                                 st.caption("Bu probleme bağlı aksiyon yok.")
 
+elif current == "acik_problemler":
 
-# ═══════════════════════════════════════════════════════════════════════════
-#  SAYFA: Aksiyon Takip Panosu
-# ═══════════════════════════════════════════════════════════════════════════
+    st.subheader("🔴 Açık Problemler — Çözüm Bekleyen Uygunsuzluklar")
+    open_issues = load_open_issues()
+
+    if not open_issues:
+        st.success("🎉 Açık problem bulunmuyor!")
+    else:
+        st.info(f"**{len(open_issues)}** adet açık problem mevcut.")
+
+        # Header Columns
+        header_cols = st.columns([0.5, 1.4, 1.4, 3.4, 1.3])
+        header_cols[0].markdown("**#**")
+        header_cols[1].markdown("**Kategori**")
+        header_cols[2].markdown("**Tespit Yeri**")
+        header_cols[3].markdown("**Problem Tanımı**")
+        header_cols[4].markdown("")
+
+        # Data Rows
+        for issue in open_issues:
+            is_selected = st.session_state.get("add_action_for_issue_id") == issue["id"]
+            prefix = "👉 " if is_selected else ""
+            rc = st.columns([0.5, 1.4, 1.4, 3.4, 1.3])
+            rc[0].write(f"**{prefix}#{issue['id']}**")
+            rc[1].markdown(f"<span class='badge badge-prog'>{issue['kategori']}</span>", unsafe_allow_html=True)
+            rc[2].write(issue['tespit_yeri'])
+            rc[3].write(issue['problem_tanimi'])
+            with rc[4]:
+                if st.button("⚡ Aksiyon", key=f"add_act_{issue['id']}", use_container_width=True):
+                    st.session_state.add_action_for_issue_id = issue['id']
+                    st.rerun()
+
+        # Inline Action Definition Form
+        if st.session_state.get("add_action_for_issue_id"):
+            target_id = st.session_state.add_action_for_issue_id
+            target_issue = next((i for i in open_issues if i["id"] == target_id), None)
+            if target_issue:
+                st.divider()
+                st.subheader(f"⚡ Problem #{target_id} için Aksiyon Tanımla")
+                st.info(
+                    f"**Kategori:** {target_issue['kategori']} | **Tespit Yeri:** {target_issue['tespit_yeri']}\n\n"
+                    f"**Problem Tanımı:** {target_issue['problem_tanimi']}"
+                )
+                
+                with st.form("open_issue_action_form", clear_on_submit=True):
+                    cx, cy, cz, cw = st.columns([1.5, 1.0, 1.0, 1.0])
+                    with cx:
+                        aksiyon_tanimi = st.text_area("Aksiyon Tanımı", placeholder="Geçici aksiyon detaylarını girin...", height=80)
+                    with cy:
+                        users_list = load_all_users()
+                        if users_list:
+                            sorumlu_options = [u["ad_soyad"] for u in users_list]
+                            default_idx = 0
+                            logged_in_name = st.session_state.user_info.get("ad_soyad", "") if st.session_state.get("user_info") else ""
+                            if logged_in_name in sorumlu_options:
+                                default_idx = sorumlu_options.index(logged_in_name)
+                            sorumlu = st.selectbox("Sorumlu Kişi", sorumlu_options, index=default_idx)
+                        else:
+                            sorumlu = st.text_input("Sorumlu Kişi", placeholder="Ad Soyad")
+                    with cz:
+                        termin = st.date_input("Termin Tarihi", value=date.today() + timedelta(days=3), min_value=date.today())
+                    with cw:
+                        aksiyon_durumu = st.text_input("Aksiyon Durumu", value="Açık", disabled=True)
+                    
+                    fcol1, fcol2 = st.columns(2)
+                    with fcol1:
+                        submitted_action = st.form_submit_button(
+                            "💾 Aksiyonu Kaydet", use_container_width=True, type="primary"
+                        )
+                    with fcol2:
+                        cancelled = st.form_submit_button(
+                            "❌ İptal", use_container_width=True
+                        )
+                        
+                if submitted_action:
+                    if not aksiyon_tanimi.strip() or not sorumlu.strip():
+                        st.warning("Aksiyon tanımı ve sorumlu kişi zorunludur.")
+                    else:
+                        with get_db() as db:
+                            db.add(Action(
+                                issue_id=target_id,
+                                aksiyon_tanimi=aksiyon_tanimi.strip(),
+                                sorumlu=sorumlu.strip(),
+                                termin_tarihi=termin,
+                                aksiyon_durumu=sanitize_status(aksiyon_durumu),
+                            ))
+                        st.toast(f"Aksiyon başarıyla kaydedildi!", icon="✅")
+                        st.session_state.add_action_for_issue_id = None
+                        st.rerun()
+                elif cancelled:
+                    st.session_state.add_action_for_issue_id = None
+                    st.rerun()
+
 elif current == "aksiyon_takip":
 
     actions_data = load_all_actions()
@@ -1259,6 +1383,11 @@ elif current == "aksiyon_takip":
     else:
         today = date.today()
         total = len(actions_data)
+        
+        # Apply data status normalization on actions_data
+        for a in actions_data:
+            a["aksiyon_durumu"] = sanitize_status(a["aksiyon_durumu"])
+            
         open_count = sum(1 for a in actions_data if a["aksiyon_durumu"] in ("Açık", "Devam Ediyor"))
         overdue_count = sum(
             1 for a in actions_data
@@ -1275,7 +1404,7 @@ elif current == "aksiyon_takip":
         m5.metric("✅ Kapanan", closed_count)
         st.divider()
 
-        fc1, _ = st.columns([1, 3])
+        fc1, _ = st.columns([1.5, 3.5])
         with fc1:
             status_filter = st.multiselect(
                 "Durum Filtresi", options=list(AKSIYON_DURUM),
@@ -1295,212 +1424,6 @@ elif current == "aksiyon_takip":
         with st.expander("📊 Tablo Görünümü (DataFrame)", expanded=False):
             render_action_dataframe(actions_data, today)
 
-        with st.expander("⚠️ Gelişmiş: Kayıt Sil", expanded=False):
-            st.caption("Hatalı veya yanlış girilmiş bir aksiyonu veritabanından kalıcı olarak silmek için kullanın.")
-            del_options = {
-                f"#{a['id']} — {a['sorumlu']}: {a['aksiyon_tanimi'][:60]}": a["id"]
-                for a in actions_data
-            }
-            selected_del = st.selectbox(
-                "Silinecek Aksiyonu Seçin", list(del_options.keys()), key="adv_del_select",
-            )
-            if st.button(
-                "🗑️ Veritabanından Tamamen Sil",
-                key="adv_del_btn",
-                type="primary",
-                use_container_width=True,
-            ):
-                aid = del_options[selected_del]
-                if delete_action_by_id(aid):
-                    st.success(f"Aksiyon #{aid} veritabanından tamamen silindi.")
-                    st.rerun()
-                else:
-                    st.error(f"Aksiyon #{aid} bulunamadı!")
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-#  SAYFA: Geciken Aksiyonlar (özel filtre)
-# ═══════════════════════════════════════════════════════════════════════════
-elif current == "geciken":
-
-    st.subheader("⚠️ Geciken Aksiyonlar — Termin Tarihi Geçmiş Aksiyonlar")
-    st.caption("Bu sayfa yalnızca durumu **Açık** veya **Devam Ediyor** olan ve termin tarihi geçmiş aksiyonları listeler.")
-
-    actions_data = load_all_actions()
-    today = date.today()
-    overdue_actions = [
-        a for a in actions_data
-        if a["aksiyon_durumu"] in ("Açık", "Devam Ediyor") and a["termin_tarihi"] < today
-    ]
-
-    if not overdue_actions:
-        st.success("🎉 Geciken aksiyon bulunmuyor! Tüm aksiyonlar zamanında.")
-    else:
-        st.error(f"**{len(overdue_actions)}** adet geciken aksiyon tespit edildi.")
-
-        # Metrikler
-        max_late = max((today - a["termin_tarihi"]).days for a in overdue_actions)
-        avg_late = sum((today - a["termin_tarihi"]).days for a in overdue_actions) / len(overdue_actions)
-        mc1, mc2, mc3 = st.columns(3)
-        mc1.metric("Geciken Aksiyon", len(overdue_actions))
-        mc2.metric("En Fazla Gecikme", f"{max_late} gün")
-        mc3.metric("Ortalama Gecikme", f"{avg_late:.0f} gün")
-        st.divider()
-
-        render_action_table(overdue_actions, today, page_prefix="gc_")
-
-        st.divider()
-        render_action_update_form(actions_data)
-
-        with st.expander("⚠️ Gelişmiş: Kayıt Sil", expanded=False):
-            st.caption("Geciken aksiyonlardan hatalı kaydı kalıcı olarak silmek için kullanın.")
-            del_opts_gc = {
-                f"#{a['id']} — {a['sorumlu']}: {a['aksiyon_tanimi'][:60]}": a["id"]
-                for a in overdue_actions
-            }
-            selected_del_gc = st.selectbox(
-                "Silinecek Aksiyonu Seçin", list(del_opts_gc.keys()), key="gc_del_select",
-            )
-            if st.button(
-                "🗑️ Veritabanından Tamamen Sil",
-                key="gc_del_btn",
-                type="primary",
-                use_container_width=True,
-            ):
-                aid_gc = del_opts_gc[selected_del_gc]
-                if delete_action_by_id(aid_gc):
-                    st.success(f"Aksiyon #{aid_gc} veritabanından tamamen silindi.")
-                    st.rerun()
-                else:
-                    st.error(f"Aksiyon #{aid_gc} bulunamadı!")
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-#  SAYFA: Açık Problemler
-# ═══════════════════════════════════════════════════════════════════════════
-elif current == "acik_problemler":
-
-    st.subheader("🔴 Açık Problemler — Çözüm Bekleyen Uygunsuzluklar")
-    open_issues = load_open_issues()
-
-    if not open_issues:
-        st.success("🎉 Açık problem bulunmuyor!")
-    else:
-        st.info(f"**{len(open_issues)}** adet açık problem mevcut.")
-
-        for issue in open_issues:
-            with st.container():
-                st.markdown(
-                    f"""
-<div class="info-card">
-    <h4>Problem #{issue['id']} — {issue['kategori']}</h4>
-    <p>📍 Tespit Yeri: <span class="highlight">{issue['tespit_yeri']}</span></p>
-    <p>📝 Tanım: <span class="highlight">{issue['problem_tanimi']}</span></p>
-    <p>📄 DF No: <span class="highlight">{issue['df_no'] or '—'}</span></p>
-</div>""",
-                    unsafe_allow_html=True,
-                )
-
-        st.divider()
-        st.caption("Kök neden analizi yapmak için sol menüden **🔍 Kök Neden Analizi** sayfasına gidin.")
-        if st.button("🔍 Kök Neden Analizine Git", key="goto_kok_neden"):
-            navigate("kok_neden")
-            st.rerun()
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-#  SAYFA: Kök Neden Analizi (5 Why / 4D)
-# ═══════════════════════════════════════════════════════════════════════════
-elif current == "kok_neden":
-
-    rca_issues_data = load_open_issues()
-
-    if not rca_issues_data:
-        st.markdown(
-            '<div class="empty-state"><div class="icon">🔍</div>'
-            '<h3>Açık problem bulunamadı</h3>'
-            '<p>"Sabah Toplantısı" sayfasından bir problem kaydedin.</p></div>',
-            unsafe_allow_html=True,
-        )
-    else:
-        issue_rca_options = {
-            f"#{d['id']} — [{d['kategori']}] {d['tespit_yeri']}: {d['problem_tanimi'][:80]}": idx
-            for idx, d in enumerate(rca_issues_data)
-        }
-        selected_rca_label = st.selectbox(
-            "Analiz Edilecek Problemi Seçin", list(issue_rca_options.keys()),
-        )
-        selected_rca = rca_issues_data[issue_rca_options[selected_rca_label]]
-
-        st.markdown(
-            f"""
-<div class="info-card">
-    <h4>Problem Detayı</h4>
-    <p>📍 Tespit Yeri: <span class="highlight">{selected_rca['tespit_yeri']}</span></p>
-    <p>🏷️ Kategori: <span class="highlight">{selected_rca['kategori']}</span></p>
-    <p>📝 Tanım: <span class="highlight">{selected_rca['problem_tanimi']}</span></p>
-</div>""",
-            unsafe_allow_html=True,
-        )
-        st.divider()
-        st.subheader("🔬 5 Neden Analizi (5 Why)")
-        st.caption('Her adımda bir önceki cevabın nedenini sorun: "Neden böyle oldu?"')
-
-        existing_whys = (
-            selected_rca["kok_neden_5_why"].split("\n")
-            if selected_rca["kok_neden_5_why"] else [""] * 5
-        )
-        while len(existing_whys) < 5:
-            existing_whys.append("")
-
-        with st.form("rca_form"):
-            why_labels = [
-                ("1️⃣", "Birinci Neden — Problem neden oluştu?"),
-                ("2️⃣", "İkinci Neden — İlk neden neden gerçekleşti?"),
-                ("3️⃣", "Üçüncü Neden — İkinci neden neden gerçekleşti?"),
-                ("4️⃣", "Dördüncü Neden — Üçüncü neden neden gerçekleşti?"),
-                ("5️⃣", "Beşinci Neden — Kök neden nedir?"),
-            ]
-            why_values = []
-            for idx, (icon, label) in enumerate(why_labels):
-                val = st.text_area(
-                    f"{icon}  {label}",
-                    value=existing_whys[idx] if idx < len(existing_whys) else "",
-                    height=70, key=f"why_{idx}",
-                )
-                why_values.append(val)
-
-            st.divider()
-            cdf1, cdf2 = st.columns([2, 1])
-            with cdf1:
-                df_no_input = st.text_input(
-                    "📄 Düzeltici Faaliyet No (DF / 4D Referans No)",
-                    value=selected_rca["df_no"], placeholder="DF-2026-XXXX",
-                )
-            with cdf2:
-                close_issue = st.checkbox("Problemi Kapat (analiz tamamlandı)", value=False)
-
-            save_rca = st.form_submit_button(
-                "💾 Analizi Kaydet", use_container_width=True, type="primary",
-            )
-
-        if save_rca:
-            combined_why = "\n".join(w.strip() for w in why_values)
-            with get_db() as db:
-                issue_obj = db.query(Issue).get(selected_rca["id"])
-                if issue_obj:
-                    issue_obj.kok_neden_5_why = combined_why
-                    issue_obj.df_no = df_no_input.strip() or None
-                    if close_issue:
-                        issue_obj.durum = "Kapandı"
-            status_msg = " ve problem **kapatıldı**" if close_issue else ""
-            st.success(f"Kök neden analizi kaydedildi{status_msg}!")
-            st.rerun()
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-#  SAYFA: Görsel Analiz (Dashboard)
-# ═══════════════════════════════════════════════════════════════════════════
 elif current == "gorsel_analiz":
     st.subheader("📊 Görsel Analiz Paneli")
     st.caption("Veritabanı kayıtlarının dağılım grafikleri ve KPI görselleştirmesi.")
@@ -1579,30 +1502,4 @@ elif current == "gorsel_analiz":
                 showlegend=False
             )
             st.plotly_chart(fig2, use_container_width=True)
-
-    st.markdown("---")
-    st.markdown("### 🏃 Sorumlulara Göre Aktif Aksiyon Yükü")
-    if df_active.empty:
-        st.info("Aktif aksiyon (Açık veya Devam Ediyor) bulunmuyor.")
-    else:
-        df_workload = df_active.groupby(['sorumlu', 'aksiyon_durumu']).size().reset_index(name='Aksiyon Sayısı')
-        df_workload.columns = ['Sorumlu', 'Aksiyon Durumu', 'Aksiyon Sayısı']
-        
-        fig3 = px.bar(
-            df_workload,
-            y='Sorumlu',
-            x='Aksiyon Sayısı',
-            color='Aksiyon Durumu',
-            orientation='h',
-            color_discrete_map={"Açık": "#EF4444", "Devam Ediyor": "#3B82F6"}
-        )
-        fig3.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            template="plotly_dark",
-            margin=dict(l=20, r=20, t=20, b=20),
-            height=400,
-            yaxis={'categoryorder':'total ascending'}
-        )
-        st.plotly_chart(fig3, use_container_width=True)
 

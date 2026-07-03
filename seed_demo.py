@@ -38,14 +38,6 @@ def seed_demo_data() -> None:
             tespit_yeri="Hat-3 / Son Kontrol Istasyonu",
             kategori="Kalite",
             acil_onlem_alindi_mi=True,
-            kok_neden_5_why=(
-                "1. Neden: Urun yuzeyinde cizik var -> Tasima bandi yuzeyi puruzlu.\n"
-                "2. Neden: Bant yuzeyi puruzlu -> Bant eskimis, degisim suresi gecmis.\n"
-                "3. Neden: Degisim suresi gecmis -> PM planinda bant degisimi takip edilmemis.\n"
-                "4. Neden: PM planinda takip yok -> Dijital bakim sistemi henuz devrede degil.\n"
-                "5. Neden: Sistem devrede degil -> Bakim yazilimi kurulum projesi gecikmis."
-            ),
-            df_no="DF-2026-0042",
             durum="Acik",
             olusturma_tarihi=dun_baslangic,
         )
